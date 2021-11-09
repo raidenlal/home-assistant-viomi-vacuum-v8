@@ -5,8 +5,8 @@ clean_zone:
       description: Name of the vacuum entity.
       example: "vacuum.my_viomi_vacuum_v8"
     zone:
-      description: Array of zones. Each zone is an array of 4 integer values.
-      example: "[[23510,25311,25110,26362]]"
+      description: Array of zones. Each zone is an array of 4 float values. The values are in meters, where (0, 0) is the robot attached to the docking station.
+      example: "[[-1,-1,2,2]]"
     repeats:
       description: Number of cleaning repeats for each zone between 1 and 3.
       example: "1"
@@ -18,18 +18,51 @@ clean_area:
       description: Name of the vacuum entity.
       example: "vacuum.my_viomi_vacuum_v8"
     area:
-      description: Array of areas. Each area is an array of 8 integer values (4 points).
-      example: "[[23510,25311,25110,26362]]"
+      description: Array of areas. Each area is an array of 8 float values (4 points). The values are in meters, where (0, 0) is the robot attached to the docking station.
+      example: "[[-2.75,-1.3,-2.75,-5.5,4.3,-5.5,0,-1.3]]"
     repeats:
-      description: Number of cleaning repeats for each zone between 1 and 3.
+      description: Number of cleaning repeats for each area between 1 and 3.
       example: "1"
 
 clean_point:
-  description: Start the cleaning operation by selected point.
+  description: Start cleaning around the specified coordinate (spot cleaning).
   fields:
     entity_id:
       description: Name of the vacuum entity.
       example: "vacuum.my_viomi_vacuum_v8"
     point:
       description: Point.
-      example: "[23510,25311]"
+      example: "[-2.75,-1.3]"
+
+clean_segment:
+  description: Start cleaning of the specified segment(s).
+  fields:
+    entity_id:
+      description: Name of the vacuum entity.
+      example: "vacuum.my_viomi_vacuum_v8"
+    segments:
+      description: Segments.
+      example: "[10,11]"
+
+xiaomi_clean_zone:
+  description: Obsoleted, see vacuum_clean_zone.
+  fields:
+    entity_id:
+      description: Name of the vacuum entity.
+      example: "vacuum.my_viomi_vacuum_v8"
+    zone:
+      description: Array of zones. Each zone is an array of 4 float values. The values are in meters, where (0, 0) is the robot attached to the docking station.
+      example: "[[-1,-1,2,2]]"
+    repeats:
+      description: Number of cleaning repeats for each zone between 1 and 3.
+      example: "1"
+
+xiaomi_clean_point:
+  description: Obsoleted, see vacuum_goto.
+  fields:
+    entity_id:
+      description: Name of the vacuum entity.
+      example: "vacuum.my_viomi_vacuum_v8"
+    point:
+      description: An array specifying a coordinate pair.
+      example: "[-1,2]"

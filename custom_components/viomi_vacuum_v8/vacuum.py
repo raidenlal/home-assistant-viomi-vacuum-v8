@@ -53,6 +53,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 SERVICE_CLEAN_ZONE = "clean_zone"
 SERVICE_CLEAN_AREA = "clean_area"
 SERVICE_CLEAN_POINT = "clean_point"
+SERVICE_CLEAN_SEGMENT = "clean_segment"
+SERVICE_OBS_CLEAN_ZONE = "xiaomi_clean_zone"
+SERVICE_OBS_CLEAN_POINT = "xiaomi_clean_point"
 ATTR_ZONE_ARRAY = "zone"
 ATTR_ZONE_REPEATER = "repeats"
 ATTR_AREA_ARRAY = "area"
@@ -99,6 +102,14 @@ SERVICE_SCHEMA_CLEAN_POINT = VACUUM_SERVICE_SCHEMA.extend(
         )
     }
 )
+SERVICE_SCHEMA_CLEAN_SEGMENT = VACUUM_SERVICE_SCHEMA.extend(
+    {
+        vol.Required(ATTR_SEGMENTS): vol.Any(
+            vol.Coerce(int),
+            [vol.Coerce(int)]
+        ),
+    }
+)
 
 SERVICE_TO_METHOD = {
     SERVICE_CLEAN_ZONE: {
@@ -110,6 +121,18 @@ SERVICE_TO_METHOD = {
         "schema": SERVICE_SCHEMA_CLEAN_AREA,
     },
     SERVICE_CLEAN_POINT: {
+        "method": "async_clean_point",
+        "schema": SERVICE_SCHEMA_CLEAN_POINT,
+    },
+    SERVICE_CLEAN_SEGMENT: {
+        "method": "async_clean_segment",
+        "schema": SERVICE_SCHEMA_CLEAN_SEGMENT,
+    },
+    SERVICE_OBS_CLEAN_ZONE: {
+        "method": "async_clean_zone",
+        "schema": SERVICE_SCHEMA_CLEAN_ZONE,
+    },
+    SERVICE_OBS_CLEAN_POINT: {
         "method": "async_clean_point",
         "schema": SERVICE_SCHEMA_CLEAN_POINT,
     }
@@ -462,7 +485,7 @@ class ViomiVacuumEntity(StateVacuumEntity):
             _LOGGER.warning("Got exception while fetching the state: %s", exc)
 
     async def async_clean_zone(self, zone, repeats=1):
-        """Clean selected area for the number of repeats indicated."""
+        """Clean selected zone for the number of repeats indicated."""
         result = []
         i = 0
         for z in zone:
@@ -501,3 +524,11 @@ class ViomiVacuumEntity(StateVacuumEntity):
         self._last_clean_point = point
         await self._try_command("Unable to clean point: %s", self._vacuum.raw_command, 'set_uploadmap', [0]) \
             and await self._try_command("Unable to clean point: %s", self._vacuum.raw_command, 'set_pointclean', [1, x, y])
+
+    async def async_clean_segment(self, segments):
+        """Clean selected segment(s) (rooms)"""
+        if isinstance(segments, int):
+            segments = [segments]
+
+        await self._try_command("Unable to clean segments: %s", self._vacuum.raw_command, 'set_uploadmap', [1]) \
+            and await self._try_command("Unable to clean segments: %s", self._vacuum.raw_command, 'set_mode_withroom', [0, 1, len(segments)] + segments)
