@@ -61,6 +61,7 @@ ATTR_ZONE_REPEATER = "repeats"
 ATTR_AREA_ARRAY = "area"
 ATTR_AREA_REPEATER = "repeats"
 ATTR_POINT = "point"
+ATTR_SEGMENTS = "segments"
 
 VACUUM_SERVICE_SCHEMA = vol.Schema({vol.Optional(ATTR_ENTITY_ID): cv.comp_entity_ids})
 SERVICE_SCHEMA_CLEAN_ZONE = VACUUM_SERVICE_SCHEMA.extend(
