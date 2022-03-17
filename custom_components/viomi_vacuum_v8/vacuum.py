@@ -3,7 +3,7 @@ import asyncio
 from functools import partial
 import logging
 
-from miio import DeviceException, Device, Vacuum  # pylint: disable=import-error
+from miio import DeviceException, ViomiVacuum  # pylint: disable=import-error
 import voluptuous as vol
 
 from homeassistant.components.vacuum import (
@@ -208,7 +208,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     # Create handler
     _LOGGER.info("Initializing with host %s (token %s...)", host, token[:5])
 
-    vacuum = Vacuum(host, token)
+    vacuum = ViomiVacuum(host, token)
     device = ViomiVacuumEntity(name, vacuum)
     hass.data[DATA_KEY][host] = device
 
@@ -298,7 +298,7 @@ class ViomiVacuumEntity(StateVacuumEntity):
         return list(sorted(FAN_SPEEDS.keys(), key=lambda s: FAN_SPEEDS[s]))
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the specific state attributes of this device."""
         attrs = {}
         if self.vacuum_state is not None:
