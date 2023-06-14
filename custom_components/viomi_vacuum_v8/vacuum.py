@@ -227,6 +227,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             if not hasattr(device, method["method"]):
                 continue
             await getattr(device, method["method"])(**params)
+            _LOGGER.info("Appending task instead of coroutine")
             update_tasks.append(asyncio.create_task(device.async_update_ha_state(True)))
 
         if update_tasks:
