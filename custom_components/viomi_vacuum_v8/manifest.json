@@ -1,7 +1,7 @@
 {
   "domain": "viomi_vacuum_v8",
   "name": "Viomi Vacuum V8",
-  "version": "2022.3.1",
+  "version": "2023.6.1",
   "documentation": "https://github.com/tykarol/home-assistant-viomi-vacuum-v8",
   "requirements": [
     "construct>=2.10.59",
