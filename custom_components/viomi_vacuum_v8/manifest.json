@@ -1,14 +1,14 @@
 {
   "domain": "viomi_vacuum_v8",
   "name": "Viomi Vacuum V8",
-  "version": "2023.6.1",
-  "documentation": "https://github.com/tykarol/home-assistant-viomi-vacuum-v8",
+  "version": "2024.12.1",
+  "documentation": "https://github.com/raidenlal/home-assistant-viomi-vacuum-v8/",
   "requirements": [
     "construct>=2.10.59",
     "python-miio>=0.5.11"
   ],
   "dependencies": [],
-  "codeowners": ["@nqkdev", "@KrzysztofHajdamowicz", "@tykarol"],
+  "codeowners": ["@nqkdev", "@KrzysztofHajdamowicz", "@tykarol", "@raidenlal"],
   "config_flow": false,
   "iot_class": "local_polling"
 }
