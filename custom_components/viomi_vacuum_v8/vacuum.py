@@ -9,7 +9,6 @@ import voluptuous as vol
 
 from homeassistant.components.vacuum import (
     PLATFORM_SCHEMA,
-    STATE_CLEANING,
     VacuumActivity,
     VacuumEntityFeature,
     StateVacuumEntity,
@@ -74,11 +73,9 @@ SERVICE_SCHEMA_CLEAN_AREA = VACUUM_SERVICE_SCHEMA.extend(
             list,
             [
                 vol.ExactSequence(
-                    [
-                        vol.Coerce(float), vol.Coerce(float), vol.Coerce(float),
-                        vol.Coerce(float), vol.Coerce(float), vol.Coerce(float),
-                        vol.Coerce(float), vol.Coerce(float)
-                    ]
+                    [vol.Coerce(float), vol.Coerce(float), vol.Coerce(float),
+                     vol.Coerce(float), vol.Coerce(float), vol.Coerce(float),
+                     vol.Coerce(float), vol.Coerce(float)]
                 )
             ],
         ),
@@ -96,7 +93,10 @@ SERVICE_SCHEMA_CLEAN_POINT = VACUUM_SERVICE_SCHEMA.extend(
 )
 SERVICE_SCHEMA_CLEAN_SEGMENT = VACUUM_SERVICE_SCHEMA.extend(
     {
-        vol.Required(ATTR_SEGMENTS): vol.Any(vol.Coerce(int), [vol.Coerce(int)]),
+        vol.Required(ATTR_SEGMENTS): vol.Any(
+            vol.Coerce(int),
+            [vol.Coerce(int)]
+        ),
     }
 )
 
@@ -183,7 +183,6 @@ VACUUM_CARD_PROPS_REFERENCES = {
     'cleaned_area': 's_area',
     'cleaning_time': 's_time'
 }
-
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up the Viomi Vacuum V8 robot platform."""
