@@ -398,61 +398,84 @@ class ViomiVacuumEntity(StateVacuumEntity):
         except DeviceException as exc:
             _LOGGER.warning("Got exception while fetching the state: %s", exc, exc_info=True)
 
-    async def async_clean_zone(self, zone: List[List[float]], repeats: int = 1) -> bool:
-        """Clean selected zone for the number of repeats indicated."""
-        result: List[str] = []
-        i = 0
-        for z in zone:
-            x1, y2, x2, y1 = z
-            res = "_".join(str(x) for x in [i, 0, x1, y1, x1, y2, x2, y2, x2, y1])
-            for _ in range(repeats):
-                result.append(res)
-                i += 1
-        result = [str(i)] + result
+	async def async_clean_zone(self, zone: List[List[float]], repeats: int = 1) -> None:
+		"""Clean selected zone for the number of repeats indicated."""
+		result: List[str] = []
+		i = 0
+		for z in zone:
+			x1, y2, x2, y1 = z
+			res = "_".join(str(x) for x in [i, 0, x1, y1, x1, y2, x2, y2, x2, y1])
+			for _ in range(repeats):
+				result.append(res)
+				i += 1
+		result = [str(i)] + result
 
-        upload_ok = await self._try_command("Unable to clean zone (upload map): %s", self._vacuum.raw_command, "set_uploadmap", [1])
-        zone_ok = await self._try_command("Unable to clean zone (set zone): %s", self._vacuum.raw_command, "set_zone", result)
-        mode_ok = await self._try_command("Unable to clean zone (set mode): %s", self._vacuum.raw_command, "set_mode", [3, 1])
-        return upload_ok and zone_ok and mode_ok
+		# Execute commands sequentially with error handling
+		if not await self._try_command("Unable to upload map: %s", self._vacuum.raw_command, "set_uploadmap", [1]):
+			_LOGGER.error("Failed to upload map. Aborting zone cleaning.")
+			return
 
-    async def async_clean_area(self, area: List[List[float]], repeats: int = 1) -> bool:
-        """Clean selected area for the number of repeats indicated."""
-        result: List[str] = []
-        i = 0
-        for a in area:
-            x1, y1, x2, y2, x3, y3, x4, y4 = a
-            res = "_".join(str(x) for x in [i, 0, x1, y1, x2, y2, x3, y3, x4, y4])
-            for _ in range(repeats):
-                result.append(res)
-                i += 1
-        result = [str(i)] + result
+		if not await self._try_command("Unable to set zone: %s", self._vacuum.raw_command, "set_zone", result):
+			_LOGGER.error("Failed to set cleaning zone. Aborting.")
+			return
 
-        upload_ok = await self._try_command("Unable to clean area (upload map): %s", self._vacuum.raw_command, "set_uploadmap", [1])
-        zone_ok = await self._try_command("Unable to clean area (set zone): %s", self._vacuum.raw_command, "set_zone", result)
-        mode_ok = await self._try_command("Unable to clean area (set mode): %s", self._vacuum.raw_command, "set_mode", [3, 1])
-        return upload_ok and zone_ok and mode_ok
+		if not await self._try_command("Unable to set cleaning mode: %s", self._vacuum.raw_command, "set_mode", [3, 1]):
+			_LOGGER.error("Failed to set cleaning mode. Aborting.")
 
-    async def async_clean_point(self, point: List[float]) -> bool:
-        """Clean selected point."""
-        x, y = point
-        self._last_clean_point = point
-        upload_ok = await self._try_command("Unable to clean point (upload map): %s", self._vacuum.raw_command, "set_uploadmap", [0])
-        point_ok = await self._try_command("Unable to clean point (set pointclean): %s", self._vacuum.raw_command, "set_pointclean", [1, x, y])
-        return upload_ok and point_ok
+	async def async_clean_area(self, area: List[List[float]], repeats: int = 1) -> None:
+		"""Clean selected area for the number of repeats indicated."""
+		result: List[str] = []
+		i = 0
+		for a in area:
+			x1, y1, x2, y2, x3, y3, x4, y4 = a
+			res = "_".join(str(x) for x in [i, 0, x1, y1, x2, y2, x3, y3, x4, y4])
+			for _ in range(repeats):
+				result.append(res)
+				i += 1
+		result = [str(i)] + result
 
-    async def async_clean_segment(self, segments: Union[int, List[int]]) -> bool:
-        """Clean selected segment(s) (rooms)."""
-        if isinstance(segments, int):
-            segments = [segments]
+		# Execute commands sequentially with error handling
+		if not await self._try_command("Unable to clean area (upload map): %s", self._vacuum.raw_command, "set_uploadmap", [1]):
+			_LOGGER.error("Failed to upload map. Aborting area cleaning.")
+			return
 
-        upload_ok = await self._try_command("Unable to clean segments (upload map): %s", self._vacuum.raw_command, "set_uploadmap", [1])
-        mode_ok = await self._try_command(
-            "Unable to clean segments (set mode with room): %s",
-            self._vacuum.raw_command,
-            "set_mode_withroom",
-            [0, 1, len(segments)] + segments,
-        )
-        return upload_ok and mode_ok
+		if not await self._try_command("Unable to clean area (set zone): %s", self._vacuum.raw_command, "set_zone", result):
+			_LOGGER.error("Failed to set cleaning zone. Aborting.")
+			return
+
+		if not await self._try_command("Unable to clean area (set mode): %s", self._vacuum.raw_command, "set_mode", [3, 1]):
+			_LOGGER.error("Failed to set cleaning mode. Aborting.")
+
+	async def async_clean_point(self, point: List[float]) -> None:
+		"""Clean selected point."""
+		x, y = point
+		self._last_clean_point = point
+
+		# Execute commands sequentially with error handling
+		if not await self._try_command("Unable to upload map: %s", self._vacuum.raw_command, "set_uploadmap", [0]):
+			_LOGGER.error("Failed to upload map. Aborting point cleaning.")
+			return
+
+		if not await self._try_command("Unable to clean point: %s", self._vacuum.raw_command, "set_pointclean", [1, x, y]):
+			_LOGGER.error("Failed to set point clean mode. Aborting.")
+
+	async def async_clean_segment(self, segments: Union[int, List[int]]) -> None:
+		"""Clean selected segment(s) (rooms)."""
+		if isinstance(segments, int):
+			segments = [segments]
+
+		# Execute commands sequentially with error handling
+		if not await self._try_command("Unable to clean segments (upload map): %s", self._vacuum.raw_command, "set_uploadmap", [1]):
+			_LOGGER.error("Failed to upload map. Aborting segment cleaning.")
+			return
+
+		if not await self._try_command(
+			"Unable to clean segments (set mode with room): %s",
+			self._vacuum.raw_command,
+			"set_mode_withroom",
+			[0, 1, len(segments)] + segments,
+		):
+			_LOGGER.error("Failed to set mode with room. Aborting.")
 
     async def async_update(self) -> None:
         """Asynchronously update the state of the entity."""
